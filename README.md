@@ -1,16 +1,9 @@
-# vue.js-start-template
+# ПАРИТЕТ РДЦ Тестовое задание
 
-### Description
+Запустите эту команду находясь в папке с проектом в командной строке 
 
-This repository is made for fast start pure vue.js projects. It's includes such features as:
-* Code-spliting by routes (with an actual preloader between chunks load)
-* Vuex starter template
-* express server for test production builds
+```npm install && npm run dev```
 
-### Main packages versions
+Сервак запуститься на 
 
-* vue: 2.6.10
-* vue-router: 3.1.3
-* vuex: 3.1.1
-* vue-loader: 15.7.1
-* webpack: 4.39.3
+```http://localhost:8080```
