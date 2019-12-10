@@ -60,6 +60,7 @@
         },
 
         watch: {
+            //Смотрим изменения vuex и обновляем вспомогательные значения
             vuexValue: function () {
                 this.tempValue = this.vuexValue;
                 this.$refs.input.value = this.vuexValue;
@@ -107,10 +108,6 @@
                 this.focusAndSelect();
             },
 
-            onInputChange(e) {
-                this.tempValue = +e.target.value;
-            },
-
             mutateValue(value){
                 if (this.type === 'first') {
                     this.$store.commit('setFirst', value);
@@ -128,18 +125,8 @@
 
             controlDown(){
                 this.focusAndSelect();
-                this.tempValue = this.tempValue - 1;
+                this.tempValue = (this.tempValue > 0) ? this.tempValue - 1 : 0;
                 this.$refs.input.value = this.tempValue;
-            },
-
-            blurHandler(){
-                setTimeout(() => {
-                    if (document.activeElement !== this.$refs.input) {
-                        this.selectorOpened = false;
-                        this.mutateValue(this.tempValue);
-                        this.$refs.input.value = this.vuexValue;
-                    }
-                }, 100);
             },
 
             openSelector(){
@@ -154,6 +141,20 @@
                 setTimeout(() => {
                     input.select();
                 }, 0);
+            },
+
+            onInputChange(e) {
+                this.tempValue = +e.target.value;
+            },
+
+            blurHandler(){
+                setTimeout(() => {
+                    if (document.activeElement !== this.$refs.input) {
+                        this.selectorOpened = false;
+                        this.mutateValue(this.tempValue);
+                        this.$refs.input.value = this.vuexValue;
+                    }
+                }, 100);
             },
 
             escapeHandler(){
