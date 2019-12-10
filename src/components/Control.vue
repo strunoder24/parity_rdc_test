@@ -73,6 +73,10 @@
                 third: state => state.controls.third,
             }),
 
+            ...mapGetters([
+                'getSummary'
+            ]),
+
             helperFunction(){
                 if (this.type === 'first') return 'summaryHelper';
                 else if (this.type === 'second') return 'constantHelper';
@@ -92,8 +96,8 @@
         },
         methods: {
             summaryHelper(){
-                this.tempValue = this.second + this.third;
-                this.$refs.input.value = this.tempValue;
+                this.tempValue = this.getSummary;
+                this.$refs.input.value = this.getSummary;
                 this.focusAndSelect();
             },
 

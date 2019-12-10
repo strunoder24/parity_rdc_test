@@ -1,10 +1,14 @@
 const state = {
-    first: 1000000,
-    second: 0,
-    third: 0
+    first: 100,
+    second: 1000,
+    third: 1000000
 };
 
-const getters = {};
+const getters = {
+    getSummary: state => {
+        return state.second + state.third
+    }
+};
 
 const mutations = {
     setFirst(state, payload) {
@@ -20,11 +24,8 @@ const mutations = {
     },
 };
 
-const actions = {};
-
 export default {
     state,
     getters,
-    mutations,
-    actions
+    mutations
 }
