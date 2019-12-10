@@ -27,7 +27,7 @@ module.exports = env => {
                         }
                     },
                     {
-                        test: /\.module\.s(a|c)ss$/,
+                        test: /\.module\.sass$/,
                         loader: [
                             isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
                             {
@@ -49,8 +49,8 @@ module.exports = env => {
                         ]
                     },
                     {
-                        test: /\.s(a|c)ss$/,
-                        exclude: /\.module.(s(a|c)ss)$/,
+                        test: /\.sass$/,
+                        exclude: /\.module.(sass)$/,
                         loader: [
                             isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
                             'css-loader',
@@ -58,6 +58,7 @@ module.exports = env => {
                                 loader: 'sass-loader',
                                 options: {
                                     sourceMap: isDevelopment,
+                                    indentedSyntax: true
                                 }
                             }
                         ]

@@ -1,0 +1,265 @@
+<template>
+    <div class='control-container'>
+        <div class='title'>{{ title }}</div>
+        <div class='selector-container' @click='openSelector'>
+            <div class='closed-selector'>
+                <div class='closed-digit ellipsis'>{{ divideByThousands(this[type]) }}</div>
+                <font-awesome-icon icon="angle-down" class='icon-down'/>
+            </div>
+            <div class='opened-selector-container'>
+                <input class='opened-selector'
+                       :class="{'on-focus': selectorOpened}"
+                       type='number'
+                       min='0'
+                       @blur='blurHandler'
+                       @input='onInputChange'
+                       @keyup.esc='escapeHandler'
+                       @keyup.enter='enterHandler'
+                       @keydown.up='focusAndSelect'
+                       @keydown.down='focusAndSelect'
+                       ref='input'
+                >
+                <div class='selector-controls' v-show='selectorOpened'>
+                    <div class='up' @click='controlUp'>
+                        <font-awesome-icon icon="caret-up"/>
+                    </div>
+                    <div class='down' @click='controlDown'>
+                        <font-awesome-icon icon="caret-down"/>
+                    </div>
+                </div>
+                <div class='helper-function'
+                     v-if='helperFunction && selectorOpened'
+                     @click='this[helperFunction]'
+                    >{{ helperFunctionName }}
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    import { mapState, mapGetters } from 'vuex'
+    import { divideByThousands } from '~/helpers'
+
+    export default {
+        props: {
+            title: String,
+            type: String
+        },
+
+        data: () => ({
+            selectorOpened: false,
+            tempValue: 0
+        }),
+
+        mounted(){
+            let input = this.$refs.input;
+            input.value = this.vuexValue;
+            input.onfocus = () => this.selectorOpened = true;
+            this.tempValue = this.vuexValue;
+        },
+
+        watch: {
+            vuexValue: function () {
+                this.tempValue = this.vuexValue;
+                this.$refs.input.value = this.vuexValue;
+            },
+        },
+
+        computed: {
+            ...mapState({
+                first: state => state.controls.first,
+                second: state => state.controls.second,
+                third: state => state.controls.third,
+            }),
+
+            helperFunction(){
+                if (this.type === 'first') return 'summaryHelper';
+                else if (this.type === 'second') return 'constantHelper';
+                else if (this.type === 'third') return false;
+            },
+
+            helperFunctionName(){
+                if (this.type === 'first') return 'Сумма';
+                else if (this.type === 'second') return 'Константа';
+            },
+
+            vuexValue(){
+                if (this.type === 'first') return this.first;
+                else if (this.type === 'second') return this.second;
+                else if (this.type === 'third') return this.third;
+            }
+        },
+        methods: {
+            summaryHelper(){
+                this.tempValue = this.second + this.third;
+                this.$refs.input.value = this.tempValue;
+                this.focusAndSelect();
+            },
+
+            constantHelper(){
+                this.tempValue = 1000;
+                this.$refs.input.value = this.tempValue;
+                this.focusAndSelect();
+            },
+
+            onInputChange(e) {
+                this.tempValue = +e.target.value;
+            },
+
+            mutateValue(value){
+                if (this.type === 'first') {
+                    this.$store.commit('setFirst', value);
+                } else {
+                    this.$store.commit('setSecond', value);
+                    this.$store.commit('setThird', value);
+                }
+            },
+
+            controlUp(){
+                this.focusAndSelect();
+                this.tempValue = this.tempValue + 1;
+                this.$refs.input.value = this.tempValue;
+            },
+
+            controlDown(){
+                this.focusAndSelect();
+                this.tempValue = this.tempValue - 1;
+                this.$refs.input.value = this.tempValue;
+            },
+
+            blurHandler(){
+                setTimeout(() => {
+                    if (document.activeElement !== this.$refs.input) {
+                        this.selectorOpened = false;
+                        this.mutateValue(this.tempValue);
+                        this.$refs.input.value = this.vuexValue;
+                    }
+                }, 100);
+            },
+
+            openSelector(){
+                if (!this.selectorOpened) this.focusAndSelect();
+            },
+
+            focusAndSelect(){
+                let input = this.$refs.input;
+                input.focus();
+
+                //с помощью таймаута переносим команду на выделение в конец стека вызова
+                setTimeout(() => {
+                    input.select();
+                }, 0);
+            },
+
+            escapeHandler(){
+                this.tempValue = this.vuexValue;
+                this.$refs.input.blur();
+            },
+
+            enterHandler(){
+                this.mutateValue(this.tempValue);
+                this.$refs.input.blur();
+            },
+
+            divideByThousands(number){
+                return divideByThousands(number)
+            }
+        },
+    }
+</script>
+
+<style lang='sass' scoped>
+    .control-container
+        display: flex
+        justify-content: space-between
+        max-width: 100%
+        padding-left: 80px
+        margin-bottom: 60px
+
+
+    .title
+        font-size: 16px
+        color: rgba(0, 0, 0, .5)
+
+
+    .selector-container
+        position: relative
+        width: 110px
+
+
+    .closed-selector
+        display: flex
+        align-items: center
+        width: 100%
+        font-size: 16px
+        cursor: pointer
+        transition: color linear .2s
+        background-color: #fff
+
+        &:hover
+            .closed-digit
+                color: rgb(0, 50, 150)
+
+
+    .closed-digit
+        max-width: 110px
+        margin-right: 5px
+
+
+    .icon-down
+        margin-left: 3px
+        font-size: 0.7em
+
+
+    .selector-controls
+        position: absolute
+        top: 0
+        right: -20px
+        width: 20px
+        height: 25px
+
+
+    .up, .down
+        width: 100%
+        height: 50%
+        margin: 0
+        color: rgb(0, 50, 150)
+        font-size: 0.8em
+        text-align: center
+        cursor: pointer
+
+
+    .opened-selector-container
+        position: absolute
+        left: -5px
+        top: -4px
+        height: 22px
+        width: 100%
+
+
+    .opened-selector
+        width: 100%
+        padding: 3px 20px 3px 4px
+        color: transparent
+        border: none
+        background-color: transparent
+        pointer-events: none
+        z-index: -1
+
+        &.on-focus
+            z-index: 0
+            border: 1px solid lightgrey
+            color: black
+            background-color: rgb(250, 250, 250)
+            pointer-events: auto
+
+
+    .helper-function
+        position: absolute
+        top: calc(100% + 5px)
+        left: 6px
+        font-size: 12px
+        color: dodgerblue
+        cursor: pointer
+</style>
