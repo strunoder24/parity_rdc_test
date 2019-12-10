@@ -16,16 +16,9 @@
 </template>
 
 <script>
-	import { mapState } from 'vuex'
 	import Control from '~c/Control.vue'
 
     export default {
-        computed: {
-            ...mapState({
-	            // value: state => state.testCounter.value
-            })
-        },
-
 	    components: {
 		    Control
 	    }

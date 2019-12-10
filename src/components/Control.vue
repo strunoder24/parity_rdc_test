@@ -3,7 +3,7 @@
         <div class='title'>{{ title }}</div>
         <div class='selector-container' @click='openSelector'>
             <div class='closed-selector'>
-                <div class='closed-digit ellipsis'>{{ divideByThousands(this[type]) }}</div>
+                <div class='closed-digit ellipsis'>{{ divideByThousands(vuexValue) }}</div>
                 <font-awesome-icon icon="angle-down" class='icon-down'/>
             </div>
             <div class='opened-selector-container'>
