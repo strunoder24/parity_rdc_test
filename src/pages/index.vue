@@ -4,9 +4,13 @@
 			Три взаимодействующих контролла
 		</h1>
 		<Control :title="'Контролл 1'"
+		         :helperFunction="'summaryHelper'"
+		         :helperFunctionName="'Сумма'"
 		         :type="'first'"
 		/>
 		<Control :title="'Контролл 2'"
+		         :helperFunction="'constantHelper'"
+		         :helperFunctionName="'Константа'"
 		         :type="'second'"
 		/>
 		<Control :title="'Контролл 3'"

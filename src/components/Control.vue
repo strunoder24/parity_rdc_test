@@ -6,17 +6,17 @@
                 <div class='closed-digit ellipsis'>{{ divideByThousands(vuexValue) }}</div>
                 <font-awesome-icon icon="angle-down" class='icon-down'/>
             </div>
-            <div class='opened-selector-container'>
+            <div class='opened-selector-container' ref='controlContainer'>
                 <input class='opened-selector'
                        :class="{'on-focus': selectorOpened}"
                        type='number'
                        min='0'
-                       @blur='blurHandler'
                        @input='onInputChange'
                        @keyup.esc='escapeHandler'
                        @keyup.enter='enterHandler'
                        @keydown.up='focusAndSelect'
                        @keydown.down='focusAndSelect'
+                       @keydown.tab='tabHandler'
                        ref='input'
                 >
                 <div class='selector-controls' v-show='selectorOpened'>
@@ -39,12 +39,14 @@
 
 <script>
     import { mapState, mapGetters } from 'vuex'
-    import { divideByThousands } from '~/helpers'
+    import { divideByThousands } from '~a/helpers'
 
     export default {
         props: {
             title: String,
-            type: String
+            type: String,
+            helperFunction: String,
+            helperFunctionName: String
         },
 
         data: () => ({
@@ -55,12 +57,15 @@
         mounted(){
             let input = this.$refs.input;
             input.value = this.vuexValue;
-            input.onfocus = () => this.selectorOpened = true;
             this.tempValue = this.vuexValue;
+
+            input.onfocus = () => this.selectorOpened = true;
+
+            document.addEventListener("click", this.clickOutsideEvent);
         },
 
         watch: {
-            //Смотрим изменения vuex и обновляем вспомогательные значения
+            //Смотрим изменения во vuex и обновляем вспомогательные значения
             vuexValue: function () {
                 this.tempValue = this.vuexValue;
                 this.$refs.input.value = this.vuexValue;
@@ -77,17 +82,6 @@
             ...mapGetters([
                 'getSummary'
             ]),
-
-            helperFunction(){
-                if (this.type === 'first') return 'summaryHelper';
-                else if (this.type === 'second') return 'constantHelper';
-                else if (this.type === 'third') return false;
-            },
-
-            helperFunctionName(){
-                if (this.type === 'first') return 'Сумма';
-                else if (this.type === 'second') return 'Константа';
-            },
 
             vuexValue(){
                 if (this.type === 'first') return this.first;
@@ -147,16 +141,6 @@
                 this.tempValue = +e.target.value;
             },
 
-            blurHandler(){
-                setTimeout(() => {
-                    if (document.activeElement !== this.$refs.input) {
-                        this.selectorOpened = false;
-                        this.mutateValue(this.tempValue);
-                        this.$refs.input.value = this.vuexValue;
-                    }
-                }, 100);
-            },
-
             escapeHandler(){
                 this.tempValue = this.vuexValue;
                 this.$refs.input.blur();
@@ -167,10 +151,41 @@
                 this.$refs.input.blur();
             },
 
+            tabHandler(){
+                if (this.selectorOpened) this.selectorOpened = false
+            },
+
+            clickOutsideEvent(evt){
+                const container = this.$refs.controlContainer; // Элемент за которым следим
+                let targetElement = evt.target; // Элемент по которому кликнули
+
+                do {
+                    // Если клик по контейнеру, прерываем цикл.
+                    if (targetElement === container) return;
+                    // Поднимаемся по DOM
+                    targetElement = targetElement.parentNode;
+                } while (targetElement);
+
+                // Клик вне контейнера
+                this.clickedOutside();
+            },
+
+            clickedOutside(){
+                this.selectorOpened = false;
+                this.mutateValue(this.tempValue);
+                this.$refs.input.value = this.vuexValue;
+            },
+
             divideByThousands(number){
+                // Выделил разделение на тысячи в отдельный файл. Так бы я поступил в реальном проекте, так как
+                // этот метод явно бы понадобился где-то ещё вне компонента
                 return divideByThousands(number)
             }
         },
+
+        beforeDestroy() {
+            document.removeEventListener("click", this.clickOutsideEvent);
+        }
     }
 </script>
 

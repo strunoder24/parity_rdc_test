@@ -163,6 +163,7 @@ module.exports = env => {
                     '~h': path.resolve(__dirname, '../src/helpers'),
                     '~p': path.resolve(__dirname, '../src/pages'),
                     '~s': path.resolve(__dirname, '../src/store'),
+                    '~a': path.resolve(__dirname, '../src/assets')
                 }
             },
         }
