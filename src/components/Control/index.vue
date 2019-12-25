@@ -43,10 +43,22 @@
 
     export default {
         props: {
-            title: String,
-            type: String,
-            helperFunction: String,
-            helperFunctionName: String
+            title: {
+                type: String,
+                required: true
+            },
+            type: {
+                type: String,
+                required: true
+            },
+            helperFunction: {
+                type: String,
+                required: true
+            },
+            helperFunctionName: {
+                type: String,
+                required: true
+            }
         },
 
         data: () => ({

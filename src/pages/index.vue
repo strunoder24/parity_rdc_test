@@ -20,7 +20,7 @@
 </template>
 
 <script>
-	import Control from '~c/Control.vue'
+	import Control from '~c/Control'
 
     export default {
 	    components: {
