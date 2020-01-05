@@ -2,7 +2,7 @@
     <div class='control-container'>
         <div class='title'>{{ title }}</div>
         <div class='selector-container' @click='openSelector'>
-            <div class='closed-selector'>
+            <div class='closed-selector' v-show='!selectorOpened'>
                 <div class='closed-digit ellipsis'>{{ divideByThousands(vuexValue) }}</div>
                 <font-awesome-icon icon="angle-down" class='icon-down'/>
             </div>

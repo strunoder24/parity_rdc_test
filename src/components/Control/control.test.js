@@ -137,7 +137,12 @@ describe('Control components testing', () => {
     });
     describe('mouse interactions testing', () => {
         it('opens on mouse click', async () => {
+            let wrapper = createFirstWrapper();
             
+            await getSelectorContainer(wrapper).trigger('click');
+            
+            expect(getArrowsContainer(wrapper).isVisible()).toBe(true);
+            expect(getClosedDigit(wrapper).isVisible()).toBe(false);
         })
     })
 });

@@ -157,6 +157,7 @@ module.exports = env => {
             ],
 
             resolve: {
+                extensions: ['*', '.js', '.vue', '.json'],
                 alias: {
                     '~':  path.resolve(__dirname, '../src'),
                     '~c': path.resolve(__dirname, '../src/components'),
