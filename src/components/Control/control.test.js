@@ -21,8 +21,26 @@ const state = {
 };
 
 describe('Control components testing', () => {
-    describe('default state testing', () => {
-        let wrapper = mount(Component, {
+    
+    // Wrappers
+    let createFirstWrapper = () => {
+        return mount(Component, {
+            propsData: {
+                title: 'Первый контрол',
+                helperFunction: 'summaryHelper',
+                helperFunctionName: 'Сумма',
+                type: 'first'
+            },
+            mocks: {
+                $store: {
+                    state
+                }
+            },
+            localVue
+        });
+    };
+    let createSecondWrapper = () => {
+        return mount(Component, {
             propsData: {
                 title: 'Второй контрол',
                 helperFunction: 'constantHelper',
@@ -36,37 +54,90 @@ describe('Control components testing', () => {
             },
             localVue
         });
+    };
+    let createThirdWrapper = () => {
+        return mount(Component, {
+            propsData: {
+                title: 'Третий контрол',
+                type: 'third'
+            },
+            mocks: {
+                $store: {
+                    state
+                }
+            },
+            localVue
+        });
+    };
+    
+    
+    // Selectors
+    let getSelectorContainer = (wrapper) => {
+        return wrapper.find('.selector-container');
+    };
+    let getInput = (wrapper) => {
+        return wrapper.find('.opened-selector');
+    };
+    let getArrowsContainer = (wrapper) => {
+        return wrapper.find('.selector-controls');
+    };
+    let getUpButton = (wrapper) => {
+        return wrapper.find('.up');
+    };
+    let getDownButton = (wrapper) => {
+        return wrapper.find('.down');
+    };
+    let getHelperButton = (wrapper) => {
+        return wrapper.find('.helper-function');
+    };
+    let getClosedDigit = (wrapper) => {
+        return wrapper.find('.closed-digit');
+    };
+    
+    describe('default state testing', () => {
+        let wrapper = createSecondWrapper();
     
         it('successfully render control with title', () => {
             expect(wrapper.html()).toContain('Второй контрол');
         });
-        
         
         it('default value is correct', () => {
             expect(wrapper.vm.vuexValue).toBe(1000);
         });
         
         it('divided by thousands', () => {
-            expect(wrapper.find('.closed-digit').text()).toBe('1 000')
+            expect(getClosedDigit(wrapper).text()).toBe('1 000')
         });
         
         it('closed by default', () => {
-            expect(wrapper.find('.closed-digit').isVisible()).toBe(true);
-            expect(wrapper.find('.selector-controls').isVisible()).toBe(false);
+            expect(getClosedDigit(wrapper).isVisible()).toBe(true);
+            expect(getArrowsContainer(wrapper).isVisible()).toBe(false);
         });
     
         // input always should exist for being able to use tab to navigate
         it('input is always active', async () => {
-            expect(wrapper.find('.opened-selector').exists()).toBe(true);
+            let wrapper = createSecondWrapper();
+            
+            expect(getInput(wrapper).exists()).toBe(true);
         
             // activate selector
-            await wrapper.find('.selector-container').trigger('click');
+            await getSelectorContainer(wrapper).trigger('click');
         
-            expect(wrapper.find('.opened-selector').exists()).toBe(true);
+            expect(getInput(wrapper).exists()).toBe(true);
         });
     
-        it('has correct helper function name', () => {
+        it('has correct helper function name', async () => {
+            let wrapper = createSecondWrapper();
+            
+            // activate selector
+            await wrapper.find('.selector-container').trigger('click');
+            
             expect(wrapper.html()).toContain('Константа');
         });
     });
+    describe('mouse interactions testing', () => {
+        it('opens on mouse click', async () => {
+            
+        })
+    })
 });
