@@ -12,18 +12,29 @@ localVue.use(Vuex);
 library.add(faAngleUp, faAngleDown, faCaretDown, faCaretUp);
 localVue.component('font-awesome-icon', FontAwesomeIcon);
 
-const state = {
-    controls: {
-        first: 100,
-        second: 1000,
-        third: 1000000
+let store = new Vuex.Store({
+    modules: {
+        controls: {
+            state: {
+                first: 100,
+                second: 1000,
+                third: 1000000
+            },
+            getters: {
+                getSummary: jest.fn()
+            },
+            mutations: {
+                setFirst: jest.fn(),
+                setSecond: jest.fn(),
+                setThird: jest.fn()
+            }
+        }
     }
-};
+});
 
 describe('Control components testing', () => {
-    
     // Wrappers
-    let createFirstWrapper = () => {
+    let createFirstWrapper = (options) => {
         return mount(Component, {
             propsData: {
                 title: 'Первый контрол',
@@ -31,15 +42,12 @@ describe('Control components testing', () => {
                 helperFunctionName: 'Сумма',
                 type: 'first'
             },
-            mocks: {
-                $store: {
-                    state
-                }
-            },
-            localVue
+            store,
+            localVue,
+            ...options
         });
     };
-    let createSecondWrapper = () => {
+    let createSecondWrapper = (options) => {
         return mount(Component, {
             propsData: {
                 title: 'Второй контрол',
@@ -47,31 +55,28 @@ describe('Control components testing', () => {
                 helperFunctionName: 'Константа',
                 type: 'second'
             },
-            mocks: {
-                $store: {
-                    state
-                }
-            },
-            localVue
+            store,
+            localVue,
+            options
         });
     };
-    let createThirdWrapper = () => {
+    let createThirdWrapper = (options) => {
         return mount(Component, {
             propsData: {
                 title: 'Третий контрол',
                 type: 'third'
             },
-            mocks: {
-                $store: {
-                    state
-                }
-            },
-            localVue
+            store,
+            localVue,
+            options
         });
     };
     
     
     // Selectors
+    let getMainContainer = (wrapper) => {
+        return wrapper.find('.control-container');
+    };
     let getSelectorContainer = (wrapper) => {
         return wrapper.find('.selector-container');
     };
@@ -95,21 +100,23 @@ describe('Control components testing', () => {
     };
     
     describe('default state testing', () => {
-        let wrapper = createSecondWrapper();
-    
         it('successfully render control with title', () => {
+            let wrapper = createSecondWrapper();
             expect(wrapper.html()).toContain('Второй контрол');
         });
         
         it('default value is correct', () => {
+            let wrapper = createSecondWrapper();
             expect(wrapper.vm.vuexValue).toBe(1000);
         });
         
         it('divided by thousands', () => {
-            expect(getClosedDigit(wrapper).text()).toBe('1 000')
+            let wrapper = createSecondWrapper();
+            expect(getClosedDigit(wrapper).text()).toBe('1 000');
         });
         
         it('closed by default', () => {
+            let wrapper = createSecondWrapper();
             expect(getClosedDigit(wrapper).isVisible()).toBe(true);
             expect(getArrowsContainer(wrapper).isVisible()).toBe(false);
         });
@@ -122,7 +129,7 @@ describe('Control components testing', () => {
         
             // activate selector
             await getSelectorContainer(wrapper).trigger('click');
-        
+            
             expect(getInput(wrapper).exists()).toBe(true);
         });
     
@@ -137,12 +144,27 @@ describe('Control components testing', () => {
     });
     describe('mouse interactions testing', () => {
         it('opens on mouse click', async () => {
-            let wrapper = createFirstWrapper();
+            let wrapper = createFirstWrapper({
+                attachToDocument: true
+            });
             
             await getSelectorContainer(wrapper).trigger('click');
-            
             expect(getArrowsContainer(wrapper).isVisible()).toBe(true);
             expect(getClosedDigit(wrapper).isVisible()).toBe(false);
+            wrapper.destroy();
+        });
+        
+        it('close on click away', async () => {
+            let wrapper = createFirstWrapper({
+                attachToDocument: true
+            });
+    
+            await getSelectorContainer(wrapper).trigger('click');
+            await getMainContainer(wrapper).trigger('click');
+    
+            expect(getArrowsContainer(wrapper).isVisible()).toBe(false);
+            expect(getClosedDigit(wrapper).isVisible()).toBe(true);
+            wrapper.destroy();
         })
     })
 });

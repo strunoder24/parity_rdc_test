@@ -1,7 +1,7 @@
 <template>
     <div class='control-container'>
         <div class='title'>{{ title }}</div>
-        <div class='selector-container' @click='openSelector'>
+        <div class='selector-container' @click.prevent.stop='openSelector'>
             <div class='closed-selector' v-show='!selectorOpened'>
                 <div class='closed-digit ellipsis'>{{ divideByThousands(vuexValue) }}</div>
                 <font-awesome-icon icon="angle-down" class='icon-down'/>
@@ -53,11 +53,11 @@
             },
             helperFunction: {
                 type: String,
-                required: true
+                required: false
             },
             helperFunctionName: {
                 type: String,
-                required: true
+                required: false
             }
         },
 
@@ -71,7 +71,9 @@
             input.value = this.vuexValue;
             this.tempValue = this.vuexValue;
 
-            input.onfocus = () => this.selectorOpened = true;
+            input.onfocus = () => {
+                this.selectorOpened = true;
+            };
 
             document.addEventListener("click", this.clickOutsideEvent);
         },
@@ -170,7 +172,7 @@
             clickOutsideEvent(evt){
                 const container = this.$refs.controlContainer; // Элемент за которым следим
                 let targetElement = evt.target; // Элемент по которому кликнули
-
+    
                 do {
                     // Если клик по контейнеру, прерываем цикл.
                     if (targetElement === container) return;
@@ -183,9 +185,11 @@
             },
 
             clickedOutside(){
-                this.selectorOpened = false;
-                this.mutateValue(this.tempValue);
-                this.$refs.input.value = this.vuexValue;
+                if (this.selectorOpened) {
+                    this.selectorOpened = false;
+                    this.mutateValue(this.tempValue);
+                    this.$refs.input.value = this.vuexValue;
+                }
             },
 
             divideByThousands(number){
