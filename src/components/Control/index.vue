@@ -117,11 +117,13 @@
             },
 
             mutateValue(value){
-                if (this.type === 'first') {
-                    this.$store.commit('setFirst', value);
-                } else {
-                    this.$store.commit('setSecond', value);
-                    this.$store.commit('setThird', value);
+                if (this.vuexValue !== this.tempValue) {
+                    if (this.type === 'first') {
+                        this.$store.commit('setFirst', value);
+                    } else {
+                        this.$store.commit('setSecond', value);
+                        this.$store.commit('setThird', value);
+                    }
                 }
             },
 
@@ -157,11 +159,13 @@
 
             escapeHandler(){
                 this.tempValue = this.vuexValue;
+                this.selectorOpened = false;
                 this.$refs.input.blur();
             },
 
             enterHandler(){
                 this.mutateValue(this.tempValue);
+                this.selectorOpened = false;
                 this.$refs.input.blur();
             },
 

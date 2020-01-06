@@ -12,22 +12,28 @@ localVue.use(Vuex);
 library.add(faAngleUp, faAngleDown, faCaretDown, faCaretUp);
 localVue.component('font-awesome-icon', FontAwesomeIcon);
 
+let state = {
+    first: 100,
+    second: 1000,
+    third: 1000000
+};
+
+let getters = {
+    getSummary: jest.fn(),
+};
+
+let mutations = {
+    setFirst: jest.fn(),
+    setSecond: jest.fn(),
+    setThird: jest.fn()
+};
+
 let store = new Vuex.Store({
     modules: {
         controls: {
-            state: {
-                first: 100,
-                second: 1000,
-                third: 1000000
-            },
-            getters: {
-                getSummary: jest.fn()
-            },
-            mutations: {
-                setFirst: jest.fn(),
-                setSecond: jest.fn(),
-                setThird: jest.fn()
-            }
+            state,
+            getters,
+            mutations,
         }
     }
 });
@@ -165,6 +171,111 @@ describe('Control components testing', () => {
             expect(getArrowsContainer(wrapper).isVisible()).toBe(false);
             expect(getClosedDigit(wrapper).isVisible()).toBe(true);
             wrapper.destroy();
-        })
+        });
+        
+        it('can use arrow clicks for increment', async () => {
+            let state = {
+                first: 100,
+            };
+    
+            let getters = {
+                getSummary: jest.fn(),
+            };
+    
+            let mutations = {
+                setFirst: jest.fn(),
+            };
+    
+            let store = new Vuex.Store({
+                modules: {
+                    controls: {
+                        state,
+                        getters,
+                        mutations,
+                    }
+                }
+            });
+            
+            let wrapper = mount(Component, {
+                propsData: {
+                    title: 'Первый контрол',
+                    helperFunction: 'summaryHelper',
+                    helperFunctionName: 'Сумма',
+                    type: 'first'
+                },
+                store,
+                localVue,
+                attachToDocument: true
+            });
+            
+            let tempValue = wrapper.vm.tempValue;
+    
+            await getSelectorContainer(wrapper).trigger('click');
+            
+            await getUpButton(wrapper).trigger('click');
+            expect(wrapper.vm.tempValue).toBe(tempValue + 1);
+    
+            // is input still focused after arrow click
+            expect(getInput(wrapper).element).toBe(document.activeElement);
+    
+            await getMainContainer(wrapper).trigger('click');
+            expect(mutations.setFirst).toHaveBeenCalledTimes(1);
+            wrapper.destroy();
+        });
+    
+        it('can use arrow clicks for decrement and no less than 0', async () => {
+            let state = {
+                first: 100,
+            };
+        
+            let getters = {
+                getSummary: jest.fn(),
+            };
+        
+            let mutations = {
+                setFirst: jest.fn(),
+            };
+        
+            let store = new Vuex.Store({
+                modules: {
+                    controls: {
+                        state,
+                        getters,
+                        mutations,
+                    }
+                }
+            });
+        
+            let wrapper = mount(Component, {
+                propsData: {
+                    title: 'Первый контрол',
+                    helperFunction: 'summaryHelper',
+                    helperFunctionName: 'Сумма',
+                    type: 'first'
+                },
+                store,
+                localVue,
+                attachToDocument: true
+            });
+        
+            let tempValue = wrapper.vm.tempValue;
+        
+            await getSelectorContainer(wrapper).trigger('click');
+        
+            await getDownButton(wrapper).trigger('click');
+            expect(wrapper.vm.tempValue).toBe(tempValue - 1);
+    
+            // is input still focused after arrow click
+            expect(getInput(wrapper).element).toBe(document.activeElement);
+            
+            // testing that it cant be less than 0
+            await wrapper.setData({tempValue: 0});
+            await getDownButton(wrapper).trigger('click');
+            expect(wrapper.vm.tempValue).toBe(0);
+        
+            await getMainContainer(wrapper).trigger('click');
+            expect(mutations.setFirst).toHaveBeenCalledTimes(1);
+            wrapper.destroy();
+        });
     })
 });
