@@ -177,11 +177,7 @@ describe('Control components testing', () => {
             let state = {
                 first: 100,
             };
-    
-            let getters = {
-                getSummary: jest.fn(),
-            };
-    
+            
             let mutations = {
                 setFirst: jest.fn(),
             };
@@ -190,7 +186,6 @@ describe('Control components testing', () => {
                 modules: {
                     controls: {
                         state,
-                        getters,
                         mutations,
                     }
                 }
@@ -208,15 +203,12 @@ describe('Control components testing', () => {
                 attachToDocument: true
             });
             
-            let tempValue = wrapper.vm.tempValue;
+            let defaultValue = wrapper.vm.tempValue;
     
             await getSelectorContainer(wrapper).trigger('click');
             
             await getUpButton(wrapper).trigger('click');
-            expect(wrapper.vm.tempValue).toBe(tempValue + 1);
-    
-            // is input still focused after arrow click
-            expect(getInput(wrapper).element).toBe(document.activeElement);
+            expect(wrapper.vm.tempValue).toBe(defaultValue + 1);
     
             await getMainContainer(wrapper).trigger('click');
             expect(mutations.setFirst).toHaveBeenCalledTimes(1);
@@ -228,10 +220,6 @@ describe('Control components testing', () => {
                 first: 100,
             };
         
-            let getters = {
-                getSummary: jest.fn(),
-            };
-        
             let mutations = {
                 setFirst: jest.fn(),
             };
@@ -240,7 +228,6 @@ describe('Control components testing', () => {
                 modules: {
                     controls: {
                         state,
-                        getters,
                         mutations,
                     }
                 }
@@ -258,24 +245,169 @@ describe('Control components testing', () => {
                 attachToDocument: true
             });
         
-            let tempValue = wrapper.vm.tempValue;
+            let defaultValue = wrapper.vm.tempValue;
         
             await getSelectorContainer(wrapper).trigger('click');
-        
             await getDownButton(wrapper).trigger('click');
-            expect(wrapper.vm.tempValue).toBe(tempValue - 1);
-    
-            // is input still focused after arrow click
-            expect(getInput(wrapper).element).toBe(document.activeElement);
+            expect(wrapper.vm.tempValue).toBe(defaultValue - 1);
             
-            // testing that it cant be less than 0
-            await wrapper.setData({tempValue: 0});
-            await getDownButton(wrapper).trigger('click');
-            expect(wrapper.vm.tempValue).toBe(0);
-        
             await getMainContainer(wrapper).trigger('click');
             expect(mutations.setFirst).toHaveBeenCalledTimes(1);
             wrapper.destroy();
         });
+        
+        it('input stay focused after arrow click', async () => {
+            let state = {
+                first: 100,
+            };
+    
+            let mutations = {
+                setFirst: jest.fn(),
+            };
+    
+            let store = new Vuex.Store({
+                modules: {
+                    controls: {
+                        state,
+                        mutations,
+                    }
+                }
+            });
+    
+            let wrapper = mount(Component, {
+                propsData: {
+                    title: 'Первый контрол',
+                    helperFunction: 'summaryHelper',
+                    helperFunctionName: 'Сумма',
+                    type: 'first'
+                },
+                store,
+                localVue,
+                attachToDocument: true
+            });
+            await getSelectorContainer(wrapper).trigger('click');
+    
+            await getUpButton(wrapper).trigger('click');
+            expect(getInput(wrapper).element).toBe(document.activeElement);
+    
+            await getDownButton(wrapper).trigger('click');
+            expect(getInput(wrapper).element).toBe(document.activeElement);
+    
+            wrapper.destroy();
+        });
+        it('cant be less than 0', async() => {
+            let state = {
+                first: 100,
+            };
+    
+            let mutations = {
+                setFirst: jest.fn(),
+            };
+    
+            let store = new Vuex.Store({
+                modules: {
+                    controls: {
+                        state,
+                        mutations,
+                    }
+                }
+            });
+    
+            let wrapper = mount(Component, {
+                propsData: {
+                    title: 'Первый контрол',
+                    helperFunction: 'summaryHelper',
+                    helperFunctionName: 'Сумма',
+                    type: 'first'
+                },
+                store,
+                localVue,
+                attachToDocument: true
+            });
+    
+            await getSelectorContainer(wrapper).trigger('click');
+            await wrapper.setData({tempValue: 0});
+            await getDownButton(wrapper).trigger('click');
+            expect(wrapper.vm.tempValue).toBe(0);
+    
+            wrapper.destroy();
+        });
+        it('summ helper works as intended', async () => {
+            let state = {
+                first: 100,
+            };
+            
+            let getters = {
+                getSummary: jest.fn()
+            };
+    
+            let mutations = {
+                setFirst: jest.fn(),
+            };
+    
+            let store = new Vuex.Store({
+                modules: {
+                    controls: {
+                        state,
+                        getters,
+                        mutations,
+                    }
+                }
+            });
+    
+            let wrapper = mount(Component, {
+                propsData: {
+                    title: 'Первый контрол',
+                    helperFunction: 'summaryHelper',
+                    helperFunctionName: 'Сумма',
+                    type: 'first'
+                },
+                store,
+                localVue,
+                attachToDocument: true
+            });
+    
+            await getSelectorContainer(wrapper).trigger('click');
+            await getHelperButton(wrapper).trigger('click');
+            expect(getters.getSummary).toBeCalledTimes(1);
+            
+            wrapper.destroy();
+        });
+        it('constant helper works as intended', async () => {
+            let state = {
+                second: 1000000,
+            };
+            
+            let mutations = {
+                setSecond: jest.fn(),
+            };
+        
+            let store = new Vuex.Store({
+                modules: {
+                    controls: {
+                        state,
+                        mutations,
+                    }
+                }
+            });
+        
+            let wrapper = mount(Component, {
+                propsData: {
+                    title: 'Второй контрол',
+                    helperFunction: 'constantHelper',
+                    helperFunctionName: 'Константа',
+                    type: 'second'
+                },
+                store,
+                localVue,
+                attachToDocument: true
+            });
+        
+            await getSelectorContainer(wrapper).trigger('click');
+            await getHelperButton(wrapper).trigger('click');
+            expect(wrapper.vm.tempValue).toBe(1000);
+        
+            wrapper.destroy();
+        })
     })
 });
