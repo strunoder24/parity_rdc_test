@@ -215,7 +215,7 @@ describe('Control components testing', () => {
             wrapper.destroy();
         });
     
-        it('can use arrow clicks for decrement and no less than 0', async () => {
+        it('can use arrow clicks for decrement', async () => {
             let state = {
                 first: 100,
             };
@@ -409,5 +409,9 @@ describe('Control components testing', () => {
         
             wrapper.destroy();
         })
+    });
+    describe('keyboard interactions testing', () => {
+        // looks like vue-test-utils can't invoke native browser events but only ones that described in component...
+        // this means if I trigger keydown.up at input[type=number] it wont be incremented
     })
 });
